@@ -1,0 +1,37 @@
+name: API Test Automation
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  run-api-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Newman
+        run: npm install -g newman newman-reporter-htmlextra
+
+      - name: Run API Tests
+        run: |
+          newman run Restful-Booker-API-Testing/New-Rest-Broker.json \
+            -e Restful-Booker-API-Testing/RestfulBooker.postman_environment.json \
+            --reporters cli,htmlextra \
+            --reporter-htmlextra-export test-report.html
+
+      - name: Upload Test Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: newman-report
+          path: test-report.html
